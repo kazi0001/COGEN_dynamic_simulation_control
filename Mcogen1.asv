@@ -1,0 +1,12 @@
+% Binary dispersiion and film mass transfer
+% Kazi Monzure Khoda, Post-doc Researcher, Qatar University, 2014.
+
+% 
+
+clc
+clear
+clear global
+
+% clear all
+
+close all
