@@ -1,0 +1,1839 @@
+ 
+// Aspen Dynamics input file generated from Aspen Plus 35.0 on Thu Nov 08 12:10:23 2018
+// Aspen Plus Title:
+
+Libraries "Dynamics.acml";
+//
+//************ ACM TYPES ***********************
+//************ DO NOT EDIT!!********************
+//************ END OF ACM TYPES ****************
+//
+//
+// ********** SYSTEM SECTION - WARNING: DO NOT EDIT *************************************
+//
+DynamicsOptions as Table;
+DynamicsOptions: 
+TEXT 
+{ Version              : 1
+SizeX                  : 8035
+SizeY                  : 4020
+ShowAllVariables       : False
+ShowAllAttributes      : False
+ExpandAll              : True
+ShowRegistryAttributes : False
+VariablesPaths         : [ GlobalPropMode GlobalFlashBasis GlobalFlashSmoothTol 
+                           GlobalLLStabilityCheck GlobalPropDamping WaterID 
+                           GlobalPDriven GlobalRFlow GlobalRFlowCol GlobalLiqHead GlobalPDEReverse
+                           GlobalTimeScaler F_max P_max P_min T_max T_min TAmb PropFilter 
+                           GlobalPolMethod GlobalMax_Sites Distribution NptsMWD Upper GPC 
+                           DistType ]
+AttributesPaths        : [ Description Value Units ]
+ColumnWidths           : [ 1500 3620 1500 1100 ]
+}
+ENDTEXT;  // End of Global Table
+Solids as Table;
+Solids:
+TEXT
+    { Version : 1
+SizeX : 6045
+SizeY : 5325
+ShowAllVariables : False
+ShowAllAttributes : False
+ExpandAll : True
+ShowRegistryAttributes : False
+VariablesPaths : [ GlobalStreamClass CISolids NCSolids NIntervalsCI NIntervalsNC CAUSR1Comps CAUSR2Comps CAUSR3Comps CAUSR4Comps CAUSR5Comps CAUSRAComps CAUSRBComps CAUSRCComps CAUSRDComps CAUSREComps PROXANALComps SULFANALComps ULTANALComps GENANALComps ]
+AttributesPaths : [ Description Value ]
+ColumnWidths : [ 1575 2955 1365 ]
+}
+ENDTEXT;
+// ********** SYSTEM SECTION END ********************************************************
+// Note: VariablesPaths must have a space at the end of each line
+//
+// ********** Options Section ***********************************************************
+// Note: Make sure the AD Solver Options are to be consistent with those in .../Scripts/OnNewADScript.vb 
+OPTIONS
+  RunMode                  : "Dynamic";
+  Nonlinear.Method         : "Mixed Newton";
+  Nonlinear.MaxIter        : 150; // 500;
+  Nonlinear.MaxStepRed     : 20;
+  Tearing                  : "Update";
+  Integrator               : "ImplicitEuler"; // "VSIE";
+  Integration.StepSizeType : "Variable";
+  Integration.InitStepSize : 0.001;     // Initial integration step (hours)
+  Integration.MinStepSize  : 0.001;     // Minimum integration step (hours)
+  Integration.MaxStepSize  : 0.05;      // Maximum integration step (hours)   
+  Integration.AbsErrorTol  : 5.e-4;     // 1.e-4;
+  Integration.AbsTearTol   : 5.e-2;     // 1.e-2;
+  Integration.RelErrorTol  : 5.e-4;     // 1.e-4;
+  Integration.RelTearTol   : 5.e-2;     // 1.e-2;
+  Integration.StepSize     : 0.0025;    // Step size for fixed step Implicit Euler
+  ImpEuler.Step            : 0.0025;    // Step size for fixed step Implicit Euler 11.1
+  MA48.PivotTol            : 1.e-050;
+  VSIE.InitialStep         : 0.005;     // Initial integration step (hours)
+  VSIE.MinimumStep         : 0.001;     // Minimum integration step (hours)
+  VSIE.MaximumStep         : 0.05;      // Maximum integration step (hours)
+  VSIE.MaxCorIter          : 150;
+  VSIE.TearErrTol          : 0.01;
+  SnapshotSettings.SaveConvergedOnly: False;
+  UseSavedSnapshotOnLoad   : False;
+  CurrentUOMSet          : "METCBAR";
+END  // End of OPTIONS Section
+//
+//
+//************ Global Parameters Settings ***********************************************
+//
+WaterID as StringParameter("WATER", Description:"Component name used for water");
+WaterID: "WATER";
+
+GlobalPropMode as PropertyMode("Local", Description:"Global property mode");
+
+GlobalPDriven as logicalparameter(False, Description:"Simulation is pressure driven");
+GlobalPDriven: True; 
+
+TAmb as Temperature(10.0, Fixed, Description:"Ambient Temperature");
+TAmb: 1.000000e+001 ; 
+
+T_min as realparameter(-253.15, Description:"Temperature lower limit (C)");
+T_min: -2.631500e+002 ; 
+
+T_max as realparameter(9726.85, Description:"Temperature upper limit (C)");
+T_max: 9.726850e+003 ; 
+
+ADVersion as hidden stringparameter;
+ADVersion: "35.0"; 
+
+// End of Global Parameters Settings
+
+//
+//************ Properties Section********************************************************
+//
+PROPERTIES
+  RUNID:  "cg_8novdyn";
+
+  Type1 AS COMPONENTLIST;
+  Type1.COMPONENTS: ["METHA-01","ETHAN-01","NITRO-01","OXYGE-01",
+                     "ARGON","CARBO-01","WATER"];
+  Type1.OPTION("OPSET"): "PSRK";
+  Type1.OPTION("HENRY-COMPS"): "<none>";
+  Type1.OPTION("CHEMISTRY"): "<none>";
+  Type1.OPTION("FREE-WATER"): "STEAM-TA";
+  Type1.OPTION("TRUE-COMP"): "YES";
+  Type1.OPTION("SOLU-WATER"): "3";
+  Type1.OPTION("KBASE"): "1";
+  Type1.OPTION("MAXIT"): "500";
+  Type1.OPTION("TOLERANCE"): "1E-8";
+END  // End of Properties Section
+
+//
+//*********** FLOWSHEET ****************************************************************
+//
+FLOWSHEET
+  Componentlist: "Type1";
+
+//
+//*********** Global Reactions/Chemistry Structure *********************************************
+
+// Global Reactions Structure
+StructureContainer Reactions
+End
+
+//
+//*********** Global Reactions/Chemistry Structure *********************************************
+
+// Global Chemistry Structure
+StructureContainer Chemistry
+End
+
+// ACM Global Structures
+StructureContainer Structures
+End
+
+//
+//*********** BLOCKs & STREAMs Declaration *********************************************
+//
+  BLOCKS("B2") AS  VALVE;
+  BLOCKS("B3") AS  VALVE;
+  BLOCKS("B4") AS  VALVE;
+  BLOCKS("MIXER") AS  MIXER;
+  STREAMS("4") AS  MATERIALSTREAM;
+  STREAMS("5") AS  MATERIALSTREAM;
+  STREAMS("7") AS  MATERIALSTREAM;
+  STREAMS("8") AS  MATERIALSTREAM;
+  STREAMS("FG") AS  MATERIALSTREAM;
+  STREAMS("NG") AS  MATERIALSTREAM;
+
+//
+//*********** Connections **************************************************************
+//
+  CONNECT OUTPUT of BLOCKS("B2").OUT_P AND INPUT of BLOCKS("MIXER").IN_F WITH STREAMS("5");
+  CONNECT OUTPUT of BLOCKS("B3").OUT_P AND INPUT of BLOCKS("MIXER").IN_F WITH STREAMS("7");
+  CONNECT OUTPUT of BLOCKS("MIXER").OUT_P AND INPUT of BLOCKS("B4").IN_F WITH STREAMS("4");
+  CONNECT OUTPUT of BLOCKS("B4").OUT_P WITH STREAMS("8");
+  CONNECT INPUT of BLOCKS("B3").IN_F WITH STREAMS("FG");
+  CONNECT INPUT of BLOCKS("B2").IN_F WITH STREAMS("NG");
+
+//
+//*********** PFS Data Section ***********************************************************
+//
+Graphics:
+TEXT CLSID {A0DFFFE6-908E-11CE-A964-0000C08C668E}
+# of PFS Objects = 11
+SIZE -6.04802 -1.99424 1.19892 2.2
+BLOCK
+ID: MIXER
+Version: 1
+ICON: "TRIANGLE"
+Flag 0
+Section GLOBAL
+At -4.100000 1.700000
+Label At 0.325000 0.375000
+Scale 1.000000 Modifier 0
+BLOCK
+ID: B2
+Version: 1
+ICON: "VALVE3"
+Flag 0
+Section GLOBAL
+At -4.900000 2.000000
+Label At 0.200000 0.150000
+Scale 1.000000 Modifier 0
+BLOCK
+ID: B3
+Version: 1
+ICON: "VALVE3"
+Flag 0
+Section GLOBAL
+At -4.900000 1.400000
+Label At 0.000000 -0.250000
+Scale 1.000000 Modifier 0
+BLOCK
+ID: B4
+Version: 1
+ICON: "VALVE3"
+Flag 0
+Section GLOBAL
+At -2.600000 1.700000
+Label At 0.200000 0.150000
+Scale 1.000000 Modifier 0
+STREAM
+ID: NG
+Version: 2
+Flag 0
+GLOBAL 117
+TYPE 0 TERMINAL 1
+At -6.048022 2.196043
+Label At 0.261511 0.000000
+ROUTE 0 0
+$ $ 0.0 0.0
+ROUTE 1 0
+r r -6.048022 2.196043 0
+x x -5.525000 2.196043 0
+y y -5.525000 1.999600 0
+x x -5.200150 1.999600 0
+t l -5.000150 1.999600 0
+$ C 1.000000 0.0
+$ $ 0.0 0.0
+At 0.000000 0.000000
+Label At 0.000000 0.000000
+ROUTE 0 1
+$ $ 0.0 0.0
+ROUTE 1 1
+$ $ 0.0 0.0
+At 0.000000 0.000000
+Label At 0.000000 0.000000
+ROUTE 0 2
+$ $ 0.0 0.0
+ROUTE 1 2
+$ $ 0.0 0.0
+STREAM
+ID: FG
+Version: 2
+Flag 0
+GLOBAL 117
+TYPE 0 TERMINAL 1
+At -6.048022 1.198921
+Label At 0.261511 0.000000
+ROUTE 0 0
+$ $ 0.0 0.0
+ROUTE 1 0
+r r -6.048022 1.198921 0
+x x -5.525000 1.198921 0
+y y -5.525000 1.399600 0
+x x -5.200150 1.399600 0
+t l -5.000150 1.399600 0
+$ C 1.000000 0.0
+$ $ 0.0 0.0
+At 0.000000 0.000000
+Label At 0.000000 0.000000
+ROUTE 0 1
+$ $ 0.0 0.0
+ROUTE 1 1
+$ $ 0.0 0.0
+At 0.000000 0.000000
+Label At 0.000000 0.000000
+ROUTE 0 2
+$ $ 0.0 0.0
+ROUTE 1 2
+$ $ 0.0 0.0
+STREAM
+ID: 4
+Version: 2
+Flag 0
+GLOBAL 117
+TYPE 0 TERMINAL 0
+At -2.875075 1.699600
+Label At -0.222612 0.000000
+ROUTE 0 0
+r r -2.875075 1.699600 0
+x y -3.250000 1.699600 0
+y x -3.250000 1.698879 0
+x 0 -3.599694 1.698879 0
+t r -3.799694 1.698879 0
+$ C 1.000000 0.0
+$ $ 0.0 0.0
+ROUTE 1 0
+r r -2.875075 1.699600 0
+x x -2.787612 1.699600 0
+t l -2.700150 1.699600 0
+$ C 1.000000 0.0
+$ $ 0.0 0.0
+At 0.000000 0.000000
+Label At 0.000000 0.000000
+ROUTE 0 1
+$ $ 0.0 0.0
+ROUTE 1 1
+$ $ 0.0 0.0
+At 0.000000 0.000000
+Label At 0.000000 0.000000
+ROUTE 0 2
+$ $ 0.0 0.0
+ROUTE 1 2
+$ $ 0.0 0.0
+STREAM
+ID: 5
+Version: 2
+Flag 0
+GLOBAL 117
+TYPE 0 TERMINAL 0
+At -4.662475 2.000700
+Label At -0.037475 0.000000
+ROUTE 0 0
+r r -4.662475 2.000700 0
+x 0 -4.599950 2.000700 0
+t r -4.799950 2.000700 0
+$ C 1.000000 0.0
+$ $ 0.0 0.0
+ROUTE 1 0
+r r -4.662475 2.000700 0
+x x -4.525000 2.000700 0
+y y -4.525000 1.850700 0
+x x -4.675000 1.850700 0
+y 0 -4.675000 1.698879 0
+x x -4.600306 1.698879 0
+t l -4.400306 1.698879 0
+$ C 1.000000 0.0
+$ $ 0.0 0.0
+At 0.000000 0.000000
+Label At 0.000000 0.000000
+ROUTE 0 1
+$ $ 0.0 0.0
+ROUTE 1 1
+$ $ 0.0 0.0
+At 0.000000 0.000000
+Label At 0.000000 0.000000
+ROUTE 0 2
+$ $ 0.0 0.0
+ROUTE 1 2
+$ $ 0.0 0.0
+STREAM
+ID: 7
+Version: 2
+Flag 0
+GLOBAL 117
+TYPE 0 TERMINAL 0
+At -4.662475 1.400700
+Label At 0.000000 0.000000
+ROUTE 0 0
+r r -4.662475 1.400700 0
+x 0 -4.599950 1.400700 0
+t r -4.799950 1.400700 0
+$ C 1.000000 0.0
+$ $ 0.0 0.0
+ROUTE 1 0
+r r -4.662475 1.400700 0
+x 0 -4.525000 1.400700 0
+y y -4.525000 1.500700 0
+x x -4.725000 1.500700 0
+y 0 -4.725000 1.598879 0
+x x -4.650306 1.598879 0
+t l -4.450306 1.598879 0
+$ C 2.000000 0.0
+$ $ 0.0 0.0
+At 0.000000 0.000000
+Label At 0.000000 0.000000
+ROUTE 0 1
+$ $ 0.0 0.0
+ROUTE 1 1
+$ $ 0.0 0.0
+At 0.000000 0.000000
+Label At 0.000000 0.000000
+ROUTE 0 2
+$ $ 0.0 0.0
+ROUTE 1 2
+$ $ 0.0 0.0
+STREAM
+ID: 8
+Version: 2
+Flag 0
+GLOBAL 117
+TYPE 0 TERMINAL 2
+At -1.994245 1.697482
+Label At -0.127878 0.000000
+ROUTE 0 0
+r l -1.994245 1.697482 0
+x l -2.250000 1.697482 0
+y x -2.250000 1.750700 0
+x y -2.225000 1.750700 0
+y x -2.225000 1.700700 0
+x 0 -2.299950 1.700700 0
+t r -2.499950 1.700700 0
+$ C 1.000000 0.0
+$ $ 0.0 0.0
+ROUTE 1 0
+$ $ 0.0 0.0
+At 0.000000 0.000000
+Label At 0.000000 0.000000
+ROUTE 0 1
+$ $ 0.0 0.0
+ROUTE 1 1
+$ $ 0.0 0.0
+At 0.000000 0.000000
+Label At 0.000000 0.000000
+ROUTE 0 2
+$ $ 0.0 0.0
+ROUTE 1 2
+$ $ 0.0 0.0
+LEGEND
+Version: 2
+Unfixed
+# of PFS Objects = 0
+VIEWPORT -8.119425 8.119425 3.300000 -1.673741
+LAYOUT
+TableFormat 1
+Pages 1 1 1 1
+PAGESETUP
+PAPERSIZE 
+PAPERSOURCE 
+ORIENTATION -1
+PRINTPAGENO 1 1
+LEFTMARGIN 0.5"
+RIGHTMARGIN 0.5"
+TOPMARGIN 0.5"
+BOTTOMMARGIN 0.5"
+VISIBILITY 0.030000
+PFDFLAG 255 255
+PFDMODE 0
+SCALE 0.011871
+
+ENDTEXT;  // END of PFS Data Section
+
+//
+//*********** Blocks Operation at top level**********************************************
+//
+  WITHIN BLOCKS("B2")
+     VCHOKE : TRUE;
+     VALGEO : FALSE;
+     CAVIND : FALSE;
+
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B2")
+    COMPONENTLIST : "Type1";
+    VALIDPHASES : "Vapor-Liquid";
+    PRESMODE : "Rigorous";
+    CHAR_EQN : "USRTAB";
+
+      In_F.F : 3.000000000000e+003;
+      In_F.T : 2.500000000000e+001;
+      In_F.P : 3.000000000000e+001;
+      In_F.H : -7.554903791436e-002;
+      F : 3.000000000000e+003;
+      F_ : 3.000000000000e+003;
+      Out_P.F : 3.000000000000e+003;
+      Out_P.T : 2.414076920000e+001;
+      Out_P.P : 2.818700850000e+001;
+      Out_P.H : -7.554903791436e-002;
+      Out_P.Z("METHA-01") : 9.500000000000e-001;
+      In_F.Z("METHA-01") : 9.500000000000e-001;
+      Out_P.Z("ETHAN-01") : 5.000000000000e-002;
+      In_F.Z("ETHAN-01") : 5.000000000000e-002;
+      Out_P.Z("NITRO-01") : 0.000000000000e+000;
+      In_F.Z("NITRO-01") : 0.000000000000e+000;
+      Out_P.Z("OXYGE-01") : 0.000000000000e+000;
+      In_F.Z("OXYGE-01") : 0.000000000000e+000;
+      Out_P.Z("ARGON") : 0.000000000000e+000;
+      In_F.Z("ARGON") : 0.000000000000e+000;
+      Out_P.Z("CARBO-01") : 0.000000000000e+000;
+      In_F.Z("CARBO-01") : 0.000000000000e+000;
+      Out_P.Z("WATER") : 0.000000000000e+000;
+      In_F.Z("WATER") : 0.000000000000e+000;
+      X("METHA-01") : 0.000000000000e+000;
+      X_O("METHA-01") : 0.000000000000e+000;
+        Y("METHA-01") : 9.500000000000e-001;
+         Y_O("METHA-01") : 9.500000000000e-001;
+      X("ETHAN-01") : 0.000000000000e+000;
+      X_O("ETHAN-01") : 0.000000000000e+000;
+        Y("ETHAN-01") : 5.000000000000e-002;
+         Y_O("ETHAN-01") : 5.000000000000e-002;
+      X("NITRO-01") : 0.000000000000e+000;
+      X_O("NITRO-01") : 0.000000000000e+000;
+        Y("NITRO-01") : 0.000000000000e+000;
+         Y_O("NITRO-01") : 0.000000000000e+000;
+      X("OXYGE-01") : 0.000000000000e+000;
+      X_O("OXYGE-01") : 0.000000000000e+000;
+        Y("OXYGE-01") : 0.000000000000e+000;
+         Y_O("OXYGE-01") : 0.000000000000e+000;
+      X("ARGON") : 0.000000000000e+000;
+      X_O("ARGON") : 0.000000000000e+000;
+        Y("ARGON") : 0.000000000000e+000;
+         Y_O("ARGON") : 0.000000000000e+000;
+      X("CARBO-01") : 0.000000000000e+000;
+      X_O("CARBO-01") : 0.000000000000e+000;
+        Y("CARBO-01") : 0.000000000000e+000;
+         Y_O("CARBO-01") : 0.000000000000e+000;
+      X("WATER") : 0.000000000000e+000;
+      X_O("WATER") : 0.000000000000e+000;
+        Y("WATER") : 0.000000000000e+000;
+         Y_O("WATER") : 0.000000000000e+000;
+       Out_P.V : 8.340965196673e-001 ;
+
+    LF :      0.000000000000e+000;
+    VF :      1.000000000000e+000;
+    HL :      0.000000000000e+000;
+    HV :     -7.554903791436e-002;
+    VF_O :      1.000000000000e+000;
+    LF_O :      0.000000000000e+000;
+    RHOV :      1.272914080000e+000;
+    RHOL :      2.000000000000e+001;
+    RHO :      1.198902017238e+000;
+    FL :      9.000000000000e-001;
+    FLP :      9.000000000000e-001;
+    YFAC :      9.704927610000e-001;
+    MW :      1.674410400000e+001;
+    MWL :      1.674410400000e+001;
+    MWV :      1.674410400000e+001;
+    FK :      1.003958510000e+000;
+    RHOV_O :      1.196686630000e+000;
+    RHOL_O :      2.000000000000e+001;
+    HV_O :     -7.554903791436e-002;
+    POS :      8.000000000000e+001;
+    CV :      3.050000000000e+002;
+    XPR :      6.043305000000e-002;
+    XMAX :      0.000000000000e+000;
+    P_DROP :      1.812991500000e+000;
+    DPV_L :      3.000000000000e+001;
+    DPL_L :      3.000000000000e+001;
+    DP_CHOKE :      3.000000000000e+001;
+    PDROPC :      1.812991500000e+000;
+    CHKFAC :      6.043305000000e-002;
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B2").VAL(1)
+    NPTS : 11;
+    CVOPT : 1;
+    XTOPT : 2;
+    FLOPT : 3;
+
+     BlockVersion : "20.0";
+FL_DAT : "Yes";
+          XT_DAT : "Yes";
+
+    FL :      9.000000000000e-001;
+    POS :      8.000000000000e+001;
+    POSX(1) :      0.000000000000e+000;
+    POSX(2) :      1.000000000000e+001 , fixed;
+    POSX(3) :      2.000000000000e+001 , fixed;
+    POSX(4) :      3.000000000000e+001 , fixed;
+    POSX(5) :      4.000000000000e+001 , fixed;
+    POSX(6) :      5.000000000000e+001 , fixed;
+    POSX(7) :      6.000000000000e+001 , fixed;
+    POSX(8) :      7.000000000000e+001 , fixed;
+    POSX(9) :      8.000000000000e+001 , fixed;
+    POSX(10) :      9.000000000000e+001 , fixed;
+    POSX(11) :      1.000000000000e+002 , fixed;
+    CVAL(1) :      0.000000000000e+000;
+    CVAL(2) :      7.000000000000e+000;
+    CVAL(3) :      1.500000000000e+001;
+    CVAL(4) :      3.600000000000e+001;
+    CVAL(5) :      7.000000000000e+001;
+    CVAL(6) :      1.220000000000e+002;
+    CVAL(7) :      1.900000000000e+002;
+    CVAL(8) :      2.500000000000e+002;
+    CVAL(9) :      3.050000000000e+002;
+    CVAL(10) :      3.550000000000e+002;
+    CVAL(11) :      3.900000000000e+002;
+    XT :      0.000000000000e+000;
+    XTVAL(1) :      7.700000000000e-001;
+    XTVAL(2) :      7.700000000000e-001;
+    XTVAL(3) :      7.700000000000e-001;
+    XTVAL(4) :      7.700000000000e-001;
+    XTVAL(5) :      7.700000000000e-001;
+    XTVAL(6) :      7.700000000000e-001;
+    XTVAL(7) :      7.500000000000e-001;
+    XTVAL(8) :      7.200000000000e-001;
+    XTVAL(9) :      6.800000000000e-001;
+    XTVAL(10) :      6.500000000000e-001;
+    XTVAL(11) :      6.400000000000e-001;
+    FLVAL(1) :      9.600000000000e-001;
+    FLVAL(2) :      9.600000000000e-001;
+    FLVAL(3) :      9.600000000000e-001;
+    FLVAL(4) :      9.600000000000e-001;
+    FLVAL(5) :      9.600000000000e-001;
+    FLVAL(6) :      9.600000000000e-001;
+    FLVAL(7) :      9.500000000000e-001;
+    FLVAL(8) :      9.300000000000e-001;
+    FLVAL(9) :      9.000000000000e-001;
+    FLVAL(10) :      8.800000000000e-001;
+    FLVAL(11) :      8.700000000000e-001;
+    FLLOW :      9.600000000000e-001;
+    FLUP :      8.700000000000e-001;
+    XTLOW :      7.700000000000e-001;
+    XTUP :      6.400000000000e-001;
+    CVLOW :      0.000000000000e+000;
+    CVUP :      3.900000000000e+002;
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B2").PFLASH2(1)
+                X("METHA-01") : 0.000000000000e+000;
+      Y("METHA-01") : 9.500000000000e-001;
+      X("ETHAN-01") : 0.000000000000e+000;
+      Y("ETHAN-01") : 5.000000000000e-002;
+      X("NITRO-01") : 0.000000000000e+000;
+      Y("NITRO-01") : 0.000000000000e+000;
+      X("OXYGE-01") : 0.000000000000e+000;
+      Y("OXYGE-01") : 0.000000000000e+000;
+      X("ARGON") : 0.000000000000e+000;
+      Y("ARGON") : 0.000000000000e+000;
+      X("CARBO-01") : 0.000000000000e+000;
+      Y("CARBO-01") : 0.000000000000e+000;
+      X("WATER") : 0.000000000000e+000;
+      Y("WATER") : 0.000000000000e+000;
+
+    H :     -7.554903791436e-002;
+    P :      3.000000000000e+001;
+    T :      2.500000000000e+001;
+    LF :      0.000000000000e+000;
+    VF :      1.000000000000e+000;
+    LFACTOR :      1.000000000000e-001;
+    VFACTOR :      0.000000000000e+000;
+    ZFACTOR :      1.000000000000e+000;
+    HL :      0.000000000000e+000;
+    HV :     -7.554903791436e-002;
+    RHOV :      1.272914080000e+000;
+    RHOL :      2.000000000000e+001;
+    RHOML :      1.000000000000e+003;
+    MWL :      1.674410400000e+001;
+    MWV :      1.674410400000e+001;
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B2").PFLASH2O(1)
+      X("METHA-01") : 0.000000000000e+000;
+      Y("METHA-01") : 9.500000000000e-001;
+      X("ETHAN-01") : 0.000000000000e+000;
+      Y("ETHAN-01") : 5.000000000000e-002;
+      X("NITRO-01") : 0.000000000000e+000;
+      Y("NITRO-01") : 0.000000000000e+000;
+      X("OXYGE-01") : 0.000000000000e+000;
+      Y("OXYGE-01") : 0.000000000000e+000;
+      X("ARGON") : 0.000000000000e+000;
+      Y("ARGON") : 0.000000000000e+000;
+      X("CARBO-01") : 0.000000000000e+000;
+      Y("CARBO-01") : 0.000000000000e+000;
+      X("WATER") : 0.000000000000e+000;
+      Y("WATER") : 0.000000000000e+000;
+
+    P :      2.818700850000e+001;
+    T :      2.414076920000e+001;
+    VF :      1.000000000000e+000;
+    LFACTOR :      1.000000000000e-001;
+    VFACTOR :      0.000000000000e+000;
+    ZFACTOR :      1.000000000000e+000;
+    HL :      0.000000000000e+000;
+    HV :     -7.554903791436e-002;
+    RHOV :      1.196686630000e+000;
+    RHOL :      2.000000000000e+001;
+    RHOML :      1.000000000000e+003;
+    MWL :      1.674410400000e+001;
+    MWV :      1.674410400000e+001;
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B2")
+
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B3")
+     VCHOKE : TRUE;
+     VALGEO : FALSE;
+     CAVIND : FALSE;
+
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B3")
+    COMPONENTLIST : "Type1";
+    VALIDPHASES : "Vapor-Liquid";
+    PRESMODE : "Rigorous";
+    CHAR_EQN : "USRTAB";
+
+      In_F.F : 1.750000000000e+003;
+      In_F.T : 8.000000000000e+001;
+      In_F.P : 3.000000000000e+001;
+      In_F.H : -7.420307633604e-002;
+      F : 1.750000000000e+003;
+      F_ : 1.750000000000e+003;
+      Out_P.F : 1.750000000000e+003;
+      Out_P.T : 7.972294120000e+001;
+      Out_P.P : 2.921609880000e+001;
+      Out_P.H : -7.420307633604e-002;
+      Out_P.Z("METHA-01") : 8.500000000000e-001;
+      In_F.Z("METHA-01") : 8.500000000000e-001;
+      Out_P.Z("ETHAN-01") : 1.500000000000e-001;
+      In_F.Z("ETHAN-01") : 1.500000000000e-001;
+      Out_P.Z("NITRO-01") : 0.000000000000e+000;
+      In_F.Z("NITRO-01") : 0.000000000000e+000;
+      Out_P.Z("OXYGE-01") : 0.000000000000e+000;
+      In_F.Z("OXYGE-01") : 0.000000000000e+000;
+      Out_P.Z("ARGON") : 0.000000000000e+000;
+      In_F.Z("ARGON") : 0.000000000000e+000;
+      Out_P.Z("CARBO-01") : 0.000000000000e+000;
+      In_F.Z("CARBO-01") : 0.000000000000e+000;
+      Out_P.Z("WATER") : 0.000000000000e+000;
+      In_F.Z("WATER") : 0.000000000000e+000;
+      X("METHA-01") : 0.000000000000e+000;
+      X_O("METHA-01") : 0.000000000000e+000;
+        Y("METHA-01") : 8.500000000000e-001;
+         Y_O("METHA-01") : 8.500000000000e-001;
+      X("ETHAN-01") : 0.000000000000e+000;
+      X_O("ETHAN-01") : 0.000000000000e+000;
+        Y("ETHAN-01") : 1.500000000000e-001;
+         Y_O("ETHAN-01") : 1.500000000000e-001;
+      X("NITRO-01") : 0.000000000000e+000;
+      X_O("NITRO-01") : 0.000000000000e+000;
+        Y("NITRO-01") : 0.000000000000e+000;
+         Y_O("NITRO-01") : 0.000000000000e+000;
+      X("OXYGE-01") : 0.000000000000e+000;
+      X_O("OXYGE-01") : 0.000000000000e+000;
+        Y("OXYGE-01") : 0.000000000000e+000;
+         Y_O("OXYGE-01") : 0.000000000000e+000;
+      X("ARGON") : 0.000000000000e+000;
+      X_O("ARGON") : 0.000000000000e+000;
+        Y("ARGON") : 0.000000000000e+000;
+         Y_O("ARGON") : 0.000000000000e+000;
+      X("CARBO-01") : 0.000000000000e+000;
+      X_O("CARBO-01") : 0.000000000000e+000;
+        Y("CARBO-01") : 0.000000000000e+000;
+         Y_O("CARBO-01") : 0.000000000000e+000;
+      X("WATER") : 0.000000000000e+000;
+      X_O("WATER") : 0.000000000000e+000;
+        Y("WATER") : 0.000000000000e+000;
+         Y_O("WATER") : 0.000000000000e+000;
+       Out_P.V : 9.779358188163e-001 ;
+
+    LF :      0.000000000000e+000;
+    VF :      1.000000000000e+000;
+    HL :      0.000000000000e+000;
+    HV :     -7.420307633604e-002;
+    VF_O :      1.000000000000e+000;
+    LF_O :      0.000000000000e+000;
+    RHOV :      1.050941510000e+000;
+    RHOL :      2.000000000000e+001;
+    RHO :      1.022561993087e+000;
+    FL :      9.000000000000e-001;
+    FLP :      9.000000000000e-001;
+    YFAC :      9.864056480000e-001;
+    MW :      1.814679200000e+001;
+    MWL :      1.814679200000e+001;
+    MWV :      1.814679200000e+001;
+    FK :      9.422180010000e-001;
+    RHOV_O :      1.023717900000e+000;
+    RHOL_O :      2.000000000000e+001;
+    HV_O :     -7.420307633604e-002;
+    POS :      8.000000000000e+001;
+    CV :      3.050000000000e+002;
+    XPR :      2.613004000000e-002;
+    XMAX :      0.000000000000e+000;
+    P_DROP :      7.839012000000e-001;
+    DPV_L :      3.000000000000e+001;
+    DPL_L :      3.000000000000e+001;
+    DP_CHOKE :      3.000000000000e+001;
+    PDROPC :      7.839012000000e-001;
+    CHKFAC :      2.613004000000e-002;
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B3").VAL(1)
+    NPTS : 11;
+    CVOPT : 1;
+    XTOPT : 2;
+    FLOPT : 3;
+
+     BlockVersion : "20.0";
+FL_DAT : "Yes";
+          XT_DAT : "Yes";
+
+    FL :      9.000000000000e-001;
+    POS :      8.000000000000e+001;
+    POSX(1) :      0.000000000000e+000;
+    POSX(2) :      1.000000000000e+001 , fixed;
+    POSX(3) :      2.000000000000e+001 , fixed;
+    POSX(4) :      3.000000000000e+001 , fixed;
+    POSX(5) :      4.000000000000e+001 , fixed;
+    POSX(6) :      5.000000000000e+001 , fixed;
+    POSX(7) :      6.000000000000e+001 , fixed;
+    POSX(8) :      7.000000000000e+001 , fixed;
+    POSX(9) :      8.000000000000e+001 , fixed;
+    POSX(10) :      9.000000000000e+001 , fixed;
+    POSX(11) :      1.000000000000e+002 , fixed;
+    CVAL(1) :      0.000000000000e+000;
+    CVAL(2) :      7.000000000000e+000;
+    CVAL(3) :      1.500000000000e+001;
+    CVAL(4) :      3.600000000000e+001;
+    CVAL(5) :      7.000000000000e+001;
+    CVAL(6) :      1.220000000000e+002;
+    CVAL(7) :      1.900000000000e+002;
+    CVAL(8) :      2.500000000000e+002;
+    CVAL(9) :      3.050000000000e+002;
+    CVAL(10) :      3.550000000000e+002;
+    CVAL(11) :      3.900000000000e+002;
+    XT :      0.000000000000e+000;
+    XTVAL(1) :      7.700000000000e-001;
+    XTVAL(2) :      7.700000000000e-001;
+    XTVAL(3) :      7.700000000000e-001;
+    XTVAL(4) :      7.700000000000e-001;
+    XTVAL(5) :      7.700000000000e-001;
+    XTVAL(6) :      7.700000000000e-001;
+    XTVAL(7) :      7.500000000000e-001;
+    XTVAL(8) :      7.200000000000e-001;
+    XTVAL(9) :      6.800000000000e-001;
+    XTVAL(10) :      6.500000000000e-001;
+    XTVAL(11) :      6.400000000000e-001;
+    FLVAL(1) :      9.600000000000e-001;
+    FLVAL(2) :      9.600000000000e-001;
+    FLVAL(3) :      9.600000000000e-001;
+    FLVAL(4) :      9.600000000000e-001;
+    FLVAL(5) :      9.600000000000e-001;
+    FLVAL(6) :      9.600000000000e-001;
+    FLVAL(7) :      9.500000000000e-001;
+    FLVAL(8) :      9.300000000000e-001;
+    FLVAL(9) :      9.000000000000e-001;
+    FLVAL(10) :      8.800000000000e-001;
+    FLVAL(11) :      8.700000000000e-001;
+    FLLOW :      9.600000000000e-001;
+    FLUP :      8.700000000000e-001;
+    XTLOW :      7.700000000000e-001;
+    XTUP :      6.400000000000e-001;
+    CVLOW :      0.000000000000e+000;
+    CVUP :      3.900000000000e+002;
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B3").PFLASH2(1)
+                X("METHA-01") : 0.000000000000e+000;
+      Y("METHA-01") : 8.500000000000e-001;
+      X("ETHAN-01") : 0.000000000000e+000;
+      Y("ETHAN-01") : 1.500000000000e-001;
+      X("NITRO-01") : 0.000000000000e+000;
+      Y("NITRO-01") : 0.000000000000e+000;
+      X("OXYGE-01") : 0.000000000000e+000;
+      Y("OXYGE-01") : 0.000000000000e+000;
+      X("ARGON") : 0.000000000000e+000;
+      Y("ARGON") : 0.000000000000e+000;
+      X("CARBO-01") : 0.000000000000e+000;
+      Y("CARBO-01") : 0.000000000000e+000;
+      X("WATER") : 0.000000000000e+000;
+      Y("WATER") : 0.000000000000e+000;
+
+    H :     -7.420307633604e-002;
+    P :      3.000000000000e+001;
+    T :      8.000000000000e+001;
+    LF :      0.000000000000e+000;
+    VF :      1.000000000000e+000;
+    LFACTOR :      1.000000000000e-001;
+    VFACTOR :      0.000000000000e+000;
+    ZFACTOR :      1.000000000000e+000;
+    HL :      0.000000000000e+000;
+    HV :     -7.420307633604e-002;
+    RHOV :      1.050941510000e+000;
+    RHOL :      2.000000000000e+001;
+    RHOML :      1.000000000000e+003;
+    MWL :      1.814679200000e+001;
+    MWV :      1.814679200000e+001;
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B3").PFLASH2O(1)
+      X("METHA-01") : 0.000000000000e+000;
+      Y("METHA-01") : 8.500000000000e-001;
+      X("ETHAN-01") : 0.000000000000e+000;
+      Y("ETHAN-01") : 1.500000000000e-001;
+      X("NITRO-01") : 0.000000000000e+000;
+      Y("NITRO-01") : 0.000000000000e+000;
+      X("OXYGE-01") : 0.000000000000e+000;
+      Y("OXYGE-01") : 0.000000000000e+000;
+      X("ARGON") : 0.000000000000e+000;
+      Y("ARGON") : 0.000000000000e+000;
+      X("CARBO-01") : 0.000000000000e+000;
+      Y("CARBO-01") : 0.000000000000e+000;
+      X("WATER") : 0.000000000000e+000;
+      Y("WATER") : 0.000000000000e+000;
+
+    P :      2.921609880000e+001;
+    T :      7.972294120000e+001;
+    VF :      1.000000000000e+000;
+    LFACTOR :      1.000000000000e-001;
+    VFACTOR :      0.000000000000e+000;
+    ZFACTOR :      1.000000000000e+000;
+    HL :      0.000000000000e+000;
+    HV :     -7.420307633604e-002;
+    RHOV :      1.023717900000e+000;
+    RHOL :      2.000000000000e+001;
+    RHOML :      1.000000000000e+003;
+    MWL :      1.814679200000e+001;
+    MWV :      1.814679200000e+001;
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B3")
+
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B4")
+     VCHOKE : TRUE;
+     VALGEO : FALSE;
+     CAVIND : FALSE;
+
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B4")
+    COMPONENTLIST : "Type1";
+    VALIDPHASES : "Vapor-Liquid";
+    PRESMODE : "Rigorous";
+    CHAR_EQN : "USRTAB";
+
+      In_F.F : 4.750000000000e+003;
+      In_F.T : 4.455952730000e+001;
+      In_F.P : 2.618700850000e+001;
+      In_F.H : -7.505315750916e-002;
+      F : 4.750000000000e+003;
+      F_ : 4.750000000000e+003;
+      Out_P.F : 4.750000000000e+003;
+      Out_P.T : 4.127615560000e+001;
+      Out_P.P : 1.873246820000e+001;
+      Out_P.H : -7.505315750916e-002;
+      Out_P.Z("METHA-01") : 9.131578947368e-001;
+      In_F.Z("METHA-01") : 9.131578947368e-001;
+      Out_P.Z("ETHAN-01") : 8.684210526316e-002;
+      In_F.Z("ETHAN-01") : 8.684210526316e-002;
+      Out_P.Z("NITRO-01") : 0.000000000000e+000;
+      In_F.Z("NITRO-01") : 0.000000000000e+000;
+      Out_P.Z("OXYGE-01") : 0.000000000000e+000;
+      In_F.Z("OXYGE-01") : 0.000000000000e+000;
+      Out_P.Z("ARGON") : 0.000000000000e+000;
+      In_F.Z("ARGON") : 0.000000000000e+000;
+      Out_P.Z("CARBO-01") : 0.000000000000e+000;
+      In_F.Z("CARBO-01") : 0.000000000000e+000;
+      Out_P.Z("WATER") : 0.000000000000e+000;
+      In_F.Z("WATER") : 0.000000000000e+000;
+      X("METHA-01") : 0.000000000000e+000;
+      X_O("METHA-01") : 0.000000000000e+000;
+        Y("METHA-01") : 9.131578950000e-001;
+         Y_O("METHA-01") : 9.131578950000e-001;
+      X("ETHAN-01") : 0.000000000000e+000;
+      X_O("ETHAN-01") : 0.000000000000e+000;
+        Y("ETHAN-01") : 8.684210530000e-002;
+         Y_O("ETHAN-01") : 8.684210530000e-002;
+      X("NITRO-01") : 0.000000000000e+000;
+      X_O("NITRO-01") : 0.000000000000e+000;
+        Y("NITRO-01") : 0.000000000000e+000;
+         Y_O("NITRO-01") : 0.000000000000e+000;
+      X("OXYGE-01") : 0.000000000000e+000;
+      X_O("OXYGE-01") : 0.000000000000e+000;
+        Y("OXYGE-01") : 0.000000000000e+000;
+         Y_O("OXYGE-01") : 0.000000000000e+000;
+      X("ARGON") : 0.000000000000e+000;
+      X_O("ARGON") : 0.000000000000e+000;
+        Y("ARGON") : 0.000000000000e+000;
+         Y_O("ARGON") : 0.000000000000e+000;
+      X("CARBO-01") : 0.000000000000e+000;
+      X_O("CARBO-01") : 0.000000000000e+000;
+        Y("CARBO-01") : 0.000000000000e+000;
+         Y_O("CARBO-01") : 0.000000000000e+000;
+      X("WATER") : 0.000000000000e+000;
+      X_O("WATER") : 0.000000000000e+000;
+        Y("WATER") : 0.000000000000e+000;
+         Y_O("WATER") : 0.000000000000e+000;
+       Out_P.V : 1.327075396522e+000 ;
+
+    LF :      0.000000000000e+000;
+    VF :      1.000000000000e+000;
+    HL :      0.000000000000e+000;
+    HV :     -7.505315750916e-002;
+    VF_O :      1.000000000000e+000;
+    LF_O :      0.000000000000e+000;
+    RHOV :      1.027815510000e+000;
+    RHOL :      2.000000000000e+001;
+    RHO :      7.535366887373e-001;
+    FL :      9.000000000000e-001;
+    FLP :      9.000000000000e-001;
+    YFAC :      8.562382360000e-001;
+    MW :      1.726088380000e+001;
+    MWL :      1.726088380000e+001;
+    MWV :      1.726088380000e+001;
+    FK :      9.706472320000e-001;
+    RHOV_O :      7.365239360000e-001;
+    RHOL_O :      2.000000000000e+001;
+    HV_O :     -7.505315750916e-002;
+    POS :      8.000000000000e+001;
+    CV :      3.050000000000e+002;
+    XPR :      2.846655928645e-001;
+    XMAX :      0.000000000000e+000;
+    P_DROP :      7.454540300000e+000;
+    DPV_L :      2.618700850000e+001;
+    DPL_L :      2.618700850000e+001;
+    DP_CHOKE :      2.618700850000e+001;
+    PDROPC :      7.454540300000e+000;
+    CHKFAC :      2.846655928645e-001;
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B4").VAL(1)
+    NPTS : 11;
+    CVOPT : 1;
+    XTOPT : 2;
+    FLOPT : 3;
+
+     BlockVersion : "20.0";
+FL_DAT : "Yes";
+          XT_DAT : "Yes";
+
+    FL :      9.000000000000e-001;
+    POS :      8.000000000000e+001;
+    POSX(1) :      0.000000000000e+000;
+    POSX(2) :      1.000000000000e+001 , fixed;
+    POSX(3) :      2.000000000000e+001 , fixed;
+    POSX(4) :      3.000000000000e+001 , fixed;
+    POSX(5) :      4.000000000000e+001 , fixed;
+    POSX(6) :      5.000000000000e+001 , fixed;
+    POSX(7) :      6.000000000000e+001 , fixed;
+    POSX(8) :      7.000000000000e+001 , fixed;
+    POSX(9) :      8.000000000000e+001 , fixed;
+    POSX(10) :      9.000000000000e+001 , fixed;
+    POSX(11) :      1.000000000000e+002 , fixed;
+    CVAL(1) :      0.000000000000e+000;
+    CVAL(2) :      7.000000000000e+000;
+    CVAL(3) :      1.500000000000e+001;
+    CVAL(4) :      3.600000000000e+001;
+    CVAL(5) :      7.000000000000e+001;
+    CVAL(6) :      1.220000000000e+002;
+    CVAL(7) :      1.900000000000e+002;
+    CVAL(8) :      2.500000000000e+002;
+    CVAL(9) :      3.050000000000e+002;
+    CVAL(10) :      3.550000000000e+002;
+    CVAL(11) :      3.900000000000e+002;
+    XT :      0.000000000000e+000;
+    XTVAL(1) :      7.700000000000e-001;
+    XTVAL(2) :      7.700000000000e-001;
+    XTVAL(3) :      7.700000000000e-001;
+    XTVAL(4) :      7.700000000000e-001;
+    XTVAL(5) :      7.700000000000e-001;
+    XTVAL(6) :      7.700000000000e-001;
+    XTVAL(7) :      7.500000000000e-001;
+    XTVAL(8) :      7.200000000000e-001;
+    XTVAL(9) :      6.800000000000e-001;
+    XTVAL(10) :      6.500000000000e-001;
+    XTVAL(11) :      6.400000000000e-001;
+    FLVAL(1) :      9.600000000000e-001;
+    FLVAL(2) :      9.600000000000e-001;
+    FLVAL(3) :      9.600000000000e-001;
+    FLVAL(4) :      9.600000000000e-001;
+    FLVAL(5) :      9.600000000000e-001;
+    FLVAL(6) :      9.600000000000e-001;
+    FLVAL(7) :      9.500000000000e-001;
+    FLVAL(8) :      9.300000000000e-001;
+    FLVAL(9) :      9.000000000000e-001;
+    FLVAL(10) :      8.800000000000e-001;
+    FLVAL(11) :      8.700000000000e-001;
+    FLLOW :      9.600000000000e-001;
+    FLUP :      8.700000000000e-001;
+    XTLOW :      7.700000000000e-001;
+    XTUP :      6.400000000000e-001;
+    CVLOW :      0.000000000000e+000;
+    CVUP :      3.900000000000e+002;
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B4").PFLASH2(1)
+                X("METHA-01") : 0.000000000000e+000;
+      Y("METHA-01") : 9.131578950000e-001;
+      X("ETHAN-01") : 0.000000000000e+000;
+      Y("ETHAN-01") : 8.684210530000e-002;
+      X("NITRO-01") : 0.000000000000e+000;
+      Y("NITRO-01") : 0.000000000000e+000;
+      X("OXYGE-01") : 0.000000000000e+000;
+      Y("OXYGE-01") : 0.000000000000e+000;
+      X("ARGON") : 0.000000000000e+000;
+      Y("ARGON") : 0.000000000000e+000;
+      X("CARBO-01") : 0.000000000000e+000;
+      Y("CARBO-01") : 0.000000000000e+000;
+      X("WATER") : 0.000000000000e+000;
+      Y("WATER") : 0.000000000000e+000;
+
+    H :     -7.505315750916e-002;
+    P :      2.618700850000e+001;
+    T :      4.455952730000e+001;
+    LF :      0.000000000000e+000;
+    VF :      1.000000000000e+000;
+    LFACTOR :      1.000000000000e-001;
+    VFACTOR :      0.000000000000e+000;
+    ZFACTOR :      1.000000000000e+000;
+    HL :      0.000000000000e+000;
+    HV :     -7.505315750916e-002;
+    RHOV :      1.027815510000e+000;
+    RHOL :      2.000000000000e+001;
+    RHOML :      1.000000000000e+003;
+    MWL :      1.726088380000e+001;
+    MWV :      1.726088380000e+001;
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B4").PFLASH2O(1)
+      X("METHA-01") : 0.000000000000e+000;
+      Y("METHA-01") : 9.131578950000e-001;
+      X("ETHAN-01") : 0.000000000000e+000;
+      Y("ETHAN-01") : 8.684210530000e-002;
+      X("NITRO-01") : 0.000000000000e+000;
+      Y("NITRO-01") : 0.000000000000e+000;
+      X("OXYGE-01") : 0.000000000000e+000;
+      Y("OXYGE-01") : 0.000000000000e+000;
+      X("ARGON") : 0.000000000000e+000;
+      Y("ARGON") : 0.000000000000e+000;
+      X("CARBO-01") : 0.000000000000e+000;
+      Y("CARBO-01") : 0.000000000000e+000;
+      X("WATER") : 0.000000000000e+000;
+      Y("WATER") : 0.000000000000e+000;
+
+    P :      1.873246820000e+001;
+    T :      4.127615560000e+001;
+    VF :      1.000000000000e+000;
+    LFACTOR :      1.000000000000e-001;
+    VFACTOR :      0.000000000000e+000;
+    ZFACTOR :      1.000000000000e+000;
+    HL :      0.000000000000e+000;
+    HV :     -7.505315750916e-002;
+    RHOV :      7.365239360000e-001;
+    RHOL :      2.000000000000e+001;
+    RHOML :      1.000000000000e+003;
+    MWL :      1.726088380000e+001;
+    MWV :      1.726088380000e+001;
+  ENDWITHIN;
+
+  WITHIN BLOCKS("B4")
+
+  ENDWITHIN;
+
+  WITHIN BLOCKS("MIXER")
+    Mode : "Instantaneous";
+    ComponentList : "Type1";
+    ValidPhases : "Vapor-Liquid";
+    In_F.connection("5").F : 3.000000000000e+003;
+    In_F.connection("5").P : 2.818700850000e+001;
+    In_F.connection("5").T : 2.414076920000e+001;
+    In_F.connection("5").H : -7.554903791436e-002;
+    In_F.connection("5").z("METHA-01") : 9.500000000000e-001;
+    In_F.connection("5").z("ETHAN-01") : 5.000000000000e-002;
+    In_F.connection("5").z("NITRO-01") : 0.000000000000e+000;
+    In_F.connection("5").z("OXYGE-01") : 0.000000000000e+000;
+    In_F.connection("5").z("ARGON") : 0.000000000000e+000;
+    In_F.connection("5").z("CARBO-01") : 0.000000000000e+000;
+    In_F.connection("5").z("WATER") : 0.000000000000e+000;
+    In_F.connection("7").F : 1.750000000000e+003;
+    In_F.connection("7").P : 2.921609880000e+001;
+    In_F.connection("7").T : 7.972294120000e+001;
+    In_F.connection("7").H : -7.420307633604e-002;
+    In_F.connection("7").z("METHA-01") : 8.500000000000e-001;
+    In_F.connection("7").z("ETHAN-01") : 1.500000000000e-001;
+    In_F.connection("7").z("NITRO-01") : 0.000000000000e+000;
+    In_F.connection("7").z("OXYGE-01") : 0.000000000000e+000;
+    In_F.connection("7").z("ARGON") : 0.000000000000e+000;
+    In_F.connection("7").z("CARBO-01") : 0.000000000000e+000;
+    In_F.connection("7").z("WATER") : 0.000000000000e+000;
+    Zin("METHA-01") : 9.131578947368e-001;
+    Zin("ETHAN-01") : 8.684210526316e-002;
+    Zin("NITRO-01") : 0.000000000000e+000;
+    Zin("OXYGE-01") : 0.000000000000e+000;
+    Zin("ARGON") : 0.000000000000e+000;
+    Zin("CARBO-01") : 0.000000000000e+000;
+    Zin("WATER") : 0.000000000000e+000;
+    Out_P.F : 4.750000000000e+003;
+    Out_P.Z("METHA-01") : 9.131578947368e-001;
+    Out_P.Z("ETHAN-01") : 8.684210526316e-002;
+    Out_P.Z("NITRO-01") : 0.000000000000e+000;
+    Out_P.Z("OXYGE-01") : 0.000000000000e+000;
+    Out_P.Z("ARGON") : 0.000000000000e+000;
+    Out_P.Z("CARBO-01") : 0.000000000000e+000;
+    Out_P.Z("WATER") : 0.000000000000e+000;
+    Out_P.T : 4.455952730000e+001;
+    Out_P.P : 2.618700850000e+001;
+    Out_P.h : -7.505315750916e-002;
+    Z("METHA-01") : 9.131578947368e-001;
+    Z("ETHAN-01") : 8.684210526316e-002;
+    Z("NITRO-01") : 0.000000000000e+000;
+    Z("OXYGE-01") : 0.000000000000e+000;
+    Z("ARGON") : 0.000000000000e+000;
+    Z("CARBO-01") : 0.000000000000e+000;
+    Z("WATER") : 0.000000000000e+000;
+
+    FIN :      4.750000000000e+003;
+    PIN :      2.818700850000e+001;
+    HIN :     -7.505315733287e-002;
+    PDROPR :      2.000000000000e+000;
+    PDROP :      2.000000000000e+000;
+    T :      4.455952730000e+001;
+    P :      2.618700850000e+001;
+    H :     -7.505315750916e-002;
+    HV :     -7.505315750916e-002;
+    HL :     -7.505315733287e-002;
+    RHO :      1.027815510000e+000;
+    RHOV :      1.027815510000e+000;
+    RHOL :      1.027815510000e+000;
+    VF :      1.000000000000e+000;
+    LF :      0.000000000000e+000;
+  ENDWITHIN;
+
+  WITHIN BLOCKS("MIXER").pflash2_instant(1)
+    z("METHA-01") : 9.131578947368e-001;
+    z("ETHAN-01") : 8.684210526316e-002;
+    z("NITRO-01") : 0.000000000000e+000;
+    z("OXYGE-01") : 0.000000000000e+000;
+    z("ARGON") : 0.000000000000e+000;
+    z("CARBO-01") : 0.000000000000e+000;
+    z("WATER") : 0.000000000000e+000;
+    y("METHA-01") : 9.131578950000e-001;
+    y("ETHAN-01") : 8.684210530000e-002;
+    y("NITRO-01") : 0.000000000000e+000;
+    y("OXYGE-01") : 0.000000000000e+000;
+    y("ARGON") : 0.000000000000e+000;
+    y("CARBO-01") : 0.000000000000e+000;
+    y("WATER") : 0.000000000000e+000;
+    x("METHA-01") : 0.000000000000e+000;
+    x("ETHAN-01") : 0.000000000000e+000;
+    x("NITRO-01") : 0.000000000000e+000;
+    x("OXYGE-01") : 0.000000000000e+000;
+    x("ARGON") : 0.000000000000e+000;
+    x("CARBO-01") : 0.000000000000e+000;
+    x("WATER") : 0.000000000000e+000;
+
+    T :      4.455952730000e+001;
+    P :      2.618700850000e+001;
+    H :     -7.505315750916e-002;
+    HV :     -7.505315750916e-002;
+    HL :     -7.505315733287e-002;
+    LFACTOR :      1.000000000000e-001;
+    VFACTOR :      0.000000000000e+000;
+    RHOV :      1.027815510000e+000;
+    RHOL :      1.027815510000e+000;
+    MWV :      1.726088380000e+001;
+    MWL :      7.500000000000e+001;
+    VF :      1.000000000000e+000;
+    LF :      0.000000000000e+000;
+  ENDWITHIN;
+
+  WITHIN BLOCKS("MIXER")
+
+  ENDWITHIN;
+
+  WITHIN STREAMS("4")
+    Componentlist : "Type1";
+
+    ValidPhases : "Vapor-Only";
+    MWC("METHA-01") : 1.604276000000e+001;
+    MWC("ETHAN-01") : 3.006964000000e+001;
+    MWC("NITRO-01") : 2.801348000000e+001;
+    MWC("OXYGE-01") : 3.199880000000e+001;
+    MWC("ARGON") : 3.994800000000e+001;
+    MWC("CARBO-01") : 4.400980000000e+001;
+    MWC("WATER") : 1.801528000000e+001;
+    In_F.F : 4.750000000000e+003;
+    Out_P.F : 4.750000000000e+003;
+    Zn("METHA-01") : 9.131578947368e-001;
+    Zn("ETHAN-01") : 8.684210526316e-002;
+    Zn("NITRO-01") : 0.000000000000e+000;
+    Zn("OXYGE-01") : 0.000000000000e+000;
+    Zn("ARGON") : 0.000000000000e+000;
+    Zn("CARBO-01") : 0.000000000000e+000;
+    Zn("WATER") : 0.000000000000e+000;
+    In_F.Z("METHA-01") : 9.131578947368e-001;
+    In_F.Z("ETHAN-01") : 8.684210526316e-002;
+    In_F.Z("NITRO-01") : 0.000000000000e+000;
+    In_F.Z("OXYGE-01") : 0.000000000000e+000;
+    In_F.Z("ARGON") : 0.000000000000e+000;
+    In_F.Z("CARBO-01") : 0.000000000000e+000;
+    In_F.Z("WATER") : 0.000000000000e+000;
+    Out_P.Z("METHA-01") : 9.131578947368e-001;
+    Out_P.Z("ETHAN-01") : 8.684210526316e-002;
+    Out_P.Z("NITRO-01") : 0.000000000000e+000;
+    Out_P.Z("OXYGE-01") : 0.000000000000e+000;
+    Out_P.Z("ARGON") : 0.000000000000e+000;
+    Out_P.Z("CARBO-01") : 0.000000000000e+000;
+    Out_P.Z("WATER") : 0.000000000000e+000;
+    Zmn("METHA-01") : 8.487151131490e-001;
+    Zmn("ETHAN-01") : 1.512848862412e-001;
+    Zmn("NITRO-01") : 0.000000000000e+000;
+    Zmn("OXYGE-01") : 0.000000000000e+000;
+    Zmn("ARGON") : 0.000000000000e+000;
+    Zmn("CARBO-01") : 0.000000000000e+000;
+    Zmn("WATER") : 0.000000000000e+000;
+    Fcn("METHA-01") : 4.337500000000e+003;
+    Fcn("ETHAN-01") : 4.125000000000e+002;
+    Fcn("NITRO-01") : 0.000000000000e+000;
+    Fcn("OXYGE-01") : 0.000000000000e+000;
+    Fcn("ARGON") : 0.000000000000e+000;
+    Fcn("CARBO-01") : 0.000000000000e+000;
+    Fcn("WATER") : 0.000000000000e+000;
+    Fmcn("METHA-01") : 6.958547150000e+004;
+    Fmcn("ETHAN-01") : 1.240372650000e+004;
+    Fmcn("NITRO-01") : 0.000000000000e+000;
+    Fmcn("OXYGE-01") : 0.000000000000e+000;
+    Fmcn("ARGON") : 0.000000000000e+000;
+    Fmcn("CARBO-01") : 0.000000000000e+000;
+    Fmcn("WATER") : 0.000000000000e+000;
+    In_F.T : 4.455952730000e+001;
+    Out_P.T : 4.455952730000e+001;
+    In_F.P : 2.618700850000e+001;
+    Out_P.P : 2.618700850000e+001;
+    In_F.h : -7.505315750916e-002;
+    Out_P.h : -7.505315750916e-002;
+
+    F :      4.750000000000e+003;
+    FR :      4.750000000000e+003;
+    FM :      8.198919805000e+004;
+    FMR :      8.198919805000e+004;
+    FV :      4.621451956879e+003;
+    T :      4.455952730000e+001;
+    P :      2.618700850000e+001;
+    H :     -7.505315750916e-002;
+    RHO :      1.027815510000e+000;
+    RHOM :      1.774100408595e+001;
+    MW :      1.726088380000e+001;
+  ENDWITHIN;
+
+  WITHIN STREAMS("5")
+    Componentlist : "Type1";
+
+    ValidPhases : "Vapor-Only";
+    MWC("METHA-01") : 1.604276000000e+001;
+    MWC("ETHAN-01") : 3.006964000000e+001;
+    MWC("NITRO-01") : 2.801348000000e+001;
+    MWC("OXYGE-01") : 3.199880000000e+001;
+    MWC("ARGON") : 3.994800000000e+001;
+    MWC("CARBO-01") : 4.400980000000e+001;
+    MWC("WATER") : 1.801528000000e+001;
+    In_F.F : 3.000000000000e+003;
+    Out_P.F : 3.000000000000e+003;
+    Zn("METHA-01") : 9.500000000000e-001;
+    Zn("ETHAN-01") : 5.000000000000e-002;
+    Zn("NITRO-01") : 0.000000000000e+000;
+    Zn("OXYGE-01") : 0.000000000000e+000;
+    Zn("ARGON") : 0.000000000000e+000;
+    Zn("CARBO-01") : 0.000000000000e+000;
+    Zn("WATER") : 0.000000000000e+000;
+    In_F.Z("METHA-01") : 9.500000000000e-001;
+    In_F.Z("ETHAN-01") : 5.000000000000e-002;
+    In_F.Z("NITRO-01") : 0.000000000000e+000;
+    In_F.Z("OXYGE-01") : 0.000000000000e+000;
+    In_F.Z("ARGON") : 0.000000000000e+000;
+    In_F.Z("CARBO-01") : 0.000000000000e+000;
+    In_F.Z("WATER") : 0.000000000000e+000;
+    Out_P.Z("METHA-01") : 9.500000000000e-001;
+    Out_P.Z("ETHAN-01") : 5.000000000000e-002;
+    Out_P.Z("NITRO-01") : 0.000000000000e+000;
+    Out_P.Z("OXYGE-01") : 0.000000000000e+000;
+    Out_P.Z("ARGON") : 0.000000000000e+000;
+    Out_P.Z("CARBO-01") : 0.000000000000e+000;
+    Out_P.Z("WATER") : 0.000000000000e+000;
+    Zmn("METHA-01") : 9.102082739094e-001;
+    Zmn("ETHAN-01") : 8.979172609057e-002;
+    Zmn("NITRO-01") : 0.000000000000e+000;
+    Zmn("OXYGE-01") : 0.000000000000e+000;
+    Zmn("ARGON") : 0.000000000000e+000;
+    Zmn("CARBO-01") : 0.000000000000e+000;
+    Zmn("WATER") : 0.000000000000e+000;
+    Fcn("METHA-01") : 2.850000000000e+003;
+    Fcn("ETHAN-01") : 1.500000000000e+002;
+    Fcn("NITRO-01") : 0.000000000000e+000;
+    Fcn("OXYGE-01") : 0.000000000000e+000;
+    Fcn("ARGON") : 0.000000000000e+000;
+    Fcn("CARBO-01") : 0.000000000000e+000;
+    Fcn("WATER") : 0.000000000000e+000;
+    Fmcn("METHA-01") : 4.572186600000e+004;
+    Fmcn("ETHAN-01") : 4.510446000000e+003;
+    Fmcn("NITRO-01") : 0.000000000000e+000;
+    Fmcn("OXYGE-01") : 0.000000000000e+000;
+    Fmcn("ARGON") : 0.000000000000e+000;
+    Fmcn("CARBO-01") : 0.000000000000e+000;
+    Fmcn("WATER") : 0.000000000000e+000;
+    In_F.T : 2.414076920000e+001;
+    Out_P.T : 2.414076920000e+001;
+    In_F.P : 2.818700850000e+001;
+    Out_P.P : 2.818700850000e+001;
+    In_F.h : -7.554903791436e-002;
+    Out_P.h : -7.554903791436e-002;
+
+    F :      3.000000000000e+003;
+    FR :      3.000000000000e+003;
+    FM :      5.023231200000e+004;
+    FMR :      5.023231200000e+004;
+    FV :      2.506921966697e+003;
+    T :      2.414076920000e+001;
+    P :      2.818700850000e+001;
+    H :     -7.554903791436e-002;
+    RHO :      1.196686630000e+000;
+    RHOM :      2.003744538813e+001;
+    MW :      1.674410400000e+001;
+  ENDWITHIN;
+
+  WITHIN STREAMS("7")
+    Componentlist : "Type1";
+
+    ValidPhases : "Vapor-Only";
+    MWC("METHA-01") : 1.604276000000e+001;
+    MWC("ETHAN-01") : 3.006964000000e+001;
+    MWC("NITRO-01") : 2.801348000000e+001;
+    MWC("OXYGE-01") : 3.199880000000e+001;
+    MWC("ARGON") : 3.994800000000e+001;
+    MWC("CARBO-01") : 4.400980000000e+001;
+    MWC("WATER") : 1.801528000000e+001;
+    In_F.F : 1.750000000000e+003;
+    Out_P.F : 1.750000000000e+003;
+    Zn("METHA-01") : 8.500000000000e-001;
+    Zn("ETHAN-01") : 1.500000000000e-001;
+    Zn("NITRO-01") : 0.000000000000e+000;
+    Zn("OXYGE-01") : 0.000000000000e+000;
+    Zn("ARGON") : 0.000000000000e+000;
+    Zn("CARBO-01") : 0.000000000000e+000;
+    Zn("WATER") : 0.000000000000e+000;
+    In_F.Z("METHA-01") : 8.500000000000e-001;
+    In_F.Z("ETHAN-01") : 1.500000000000e-001;
+    In_F.Z("NITRO-01") : 0.000000000000e+000;
+    In_F.Z("OXYGE-01") : 0.000000000000e+000;
+    In_F.Z("ARGON") : 0.000000000000e+000;
+    In_F.Z("CARBO-01") : 0.000000000000e+000;
+    In_F.Z("WATER") : 0.000000000000e+000;
+    Out_P.Z("METHA-01") : 8.500000000000e-001;
+    Out_P.Z("ETHAN-01") : 1.500000000000e-001;
+    Out_P.Z("NITRO-01") : 0.000000000000e+000;
+    Out_P.Z("OXYGE-01") : 0.000000000000e+000;
+    Out_P.Z("ARGON") : 0.000000000000e+000;
+    Out_P.Z("CARBO-01") : 0.000000000000e+000;
+    Out_P.Z("WATER") : 0.000000000000e+000;
+    Zmn("METHA-01") : 7.514466468784e-001;
+    Zmn("ETHAN-01") : 2.485533531216e-001;
+    Zmn("NITRO-01") : 0.000000000000e+000;
+    Zmn("OXYGE-01") : 0.000000000000e+000;
+    Zmn("ARGON") : 0.000000000000e+000;
+    Zmn("CARBO-01") : 0.000000000000e+000;
+    Zmn("WATER") : 0.000000000000e+000;
+    Fcn("METHA-01") : 1.487500000000e+003;
+    Fcn("ETHAN-01") : 2.625000000000e+002;
+    Fcn("NITRO-01") : 0.000000000000e+000;
+    Fcn("OXYGE-01") : 0.000000000000e+000;
+    Fcn("ARGON") : 0.000000000000e+000;
+    Fcn("CARBO-01") : 0.000000000000e+000;
+    Fcn("WATER") : 0.000000000000e+000;
+    Fmcn("METHA-01") : 2.386360550000e+004;
+    Fmcn("ETHAN-01") : 7.893280500000e+003;
+    Fmcn("NITRO-01") : 0.000000000000e+000;
+    Fmcn("OXYGE-01") : 0.000000000000e+000;
+    Fmcn("ARGON") : 0.000000000000e+000;
+    Fmcn("CARBO-01") : 0.000000000000e+000;
+    Fmcn("WATER") : 0.000000000000e+000;
+    In_F.T : 7.972294120000e+001;
+    Out_P.T : 7.972294120000e+001;
+    In_F.P : 2.921609880000e+001;
+    Out_P.P : 2.921609880000e+001;
+    In_F.h : -7.420307633604e-002;
+    Out_P.h : -7.420307633604e-002;
+
+    F :      1.750000000000e+003;
+    FR :      1.750000000000e+003;
+    FM :      3.175688600000e+004;
+    FMR :      3.175688600000e+004;
+    FV :      1.709455309905e+003;
+    T :      7.972294120000e+001;
+    P :      2.921609880000e+001;
+    H :     -7.420307633604e-002;
+    RHO :      1.023717900000e+000;
+    RHOM :      1.857719579798e+001;
+    MW :      1.814679200000e+001;
+  ENDWITHIN;
+
+  WITHIN STREAMS("8")
+    Componentlist : "Type1";
+
+    ValidPhases : "Vapor-Only";
+    MWC("METHA-01") : 1.604276000000e+001;
+    MWC("ETHAN-01") : 3.006964000000e+001;
+    MWC("NITRO-01") : 2.801348000000e+001;
+    MWC("OXYGE-01") : 3.199880000000e+001;
+    MWC("ARGON") : 3.994800000000e+001;
+    MWC("CARBO-01") : 4.400980000000e+001;
+    MWC("WATER") : 1.801528000000e+001;
+    In_F.F : 4.750000000000e+003;
+    Out_P.F : 4.750000000000e+003;
+    Zn("METHA-01") : 9.131578947368e-001;
+    Zn("ETHAN-01") : 8.684210526316e-002;
+    Zn("NITRO-01") : 0.000000000000e+000;
+    Zn("OXYGE-01") : 0.000000000000e+000;
+    Zn("ARGON") : 0.000000000000e+000;
+    Zn("CARBO-01") : 0.000000000000e+000;
+    Zn("WATER") : 0.000000000000e+000;
+    In_F.Z("METHA-01") : 9.131578947368e-001;
+    In_F.Z("ETHAN-01") : 8.684210526316e-002;
+    In_F.Z("NITRO-01") : 0.000000000000e+000;
+    In_F.Z("OXYGE-01") : 0.000000000000e+000;
+    In_F.Z("ARGON") : 0.000000000000e+000;
+    In_F.Z("CARBO-01") : 0.000000000000e+000;
+    In_F.Z("WATER") : 0.000000000000e+000;
+    Out_P.Z("METHA-01") : 9.131578947368e-001;
+    Out_P.Z("ETHAN-01") : 8.684210526316e-002;
+    Out_P.Z("NITRO-01") : 0.000000000000e+000;
+    Out_P.Z("OXYGE-01") : 0.000000000000e+000;
+    Out_P.Z("ARGON") : 0.000000000000e+000;
+    Out_P.Z("CARBO-01") : 0.000000000000e+000;
+    Out_P.Z("WATER") : 0.000000000000e+000;
+    Zmn("METHA-01") : 8.487151131490e-001;
+    Zmn("ETHAN-01") : 1.512848862412e-001;
+    Zmn("NITRO-01") : 0.000000000000e+000;
+    Zmn("OXYGE-01") : 0.000000000000e+000;
+    Zmn("ARGON") : 0.000000000000e+000;
+    Zmn("CARBO-01") : 0.000000000000e+000;
+    Zmn("WATER") : 0.000000000000e+000;
+    Fcn("METHA-01") : 4.337500000000e+003;
+    Fcn("ETHAN-01") : 4.125000000000e+002;
+    Fcn("NITRO-01") : 0.000000000000e+000;
+    Fcn("OXYGE-01") : 0.000000000000e+000;
+    Fcn("ARGON") : 0.000000000000e+000;
+    Fcn("CARBO-01") : 0.000000000000e+000;
+    Fcn("WATER") : 0.000000000000e+000;
+    Fmcn("METHA-01") : 6.958547150000e+004;
+    Fmcn("ETHAN-01") : 1.240372650000e+004;
+    Fmcn("NITRO-01") : 0.000000000000e+000;
+    Fmcn("OXYGE-01") : 0.000000000000e+000;
+    Fmcn("ARGON") : 0.000000000000e+000;
+    Fmcn("CARBO-01") : 0.000000000000e+000;
+    Fmcn("WATER") : 0.000000000000e+000;
+    In_F.T : 4.127615560000e+001;
+    Out_P.T : 4.127615560000e+001;
+    In_F.P : 1.873246820000e+001;
+    Out_P.P : 1.873246820000e+001;
+    In_F.h : -7.505315750916e-002;
+    Out_P.h : -7.505315750916e-002;
+
+    F :      4.750000000000e+003;
+    FR :      4.750000000000e+003;
+    FM :      8.198919805000e+004;
+    FMR :      8.198919805000e+004;
+    FV :      6.449213349123e+003;
+    T :      4.127615560000e+001;
+    P :      1.873246820000e+001;
+    H :     -7.505315750916e-002;
+    RHO :      7.365239360000e-001;
+    RHOM :      1.271305407521e+001;
+    MW :      1.726088380000e+001;
+  ENDWITHIN;
+
+  WITHIN STREAMS("FG")
+    Componentlist : "Type1";
+
+
+    FlowBasis : "Mole";
+    CompBasis : "Mole-Frac"; 
+    ValidPhases : "Vapor-Liquid";
+    MWC("METHA-01") : 1.604276000000e+001;
+    MWC("ETHAN-01") : 3.006964000000e+001;
+    MWC("NITRO-01") : 2.801348000000e+001;
+    MWC("OXYGE-01") : 3.199880000000e+001;
+    MWC("ARGON") : 3.994800000000e+001;
+    MWC("CARBO-01") : 4.400980000000e+001;
+    MWC("WATER") : 1.801528000000e+001;
+    In_F.F : 1.750000000000e+003;
+    Out_P.F : 1.750000000000e+003;
+    TotFlowSpec : True;
+    ZR("METHA-01") : 8.500000000000e-001;
+    ZR("ETHAN-01") : 1.500000000000e-001;
+    ZR("NITRO-01") : 0.000000000000e+000;
+    ZR("OXYGE-01") : 0.000000000000e+000;
+    ZR("ARGON") : 0.000000000000e+000;
+    ZR("CARBO-01") : 0.000000000000e+000;
+    ZR("WATER") : 0.000000000000e+000;
+    Zn("METHA-01") : 8.500000000000e-001;
+    Zn("ETHAN-01") : 1.500000000000e-001;
+    Zn("NITRO-01") : 0.000000000000e+000;
+    Zn("OXYGE-01") : 0.000000000000e+000;
+    Zn("ARGON") : 0.000000000000e+000;
+    Zn("CARBO-01") : 0.000000000000e+000;
+    Zn("WATER") : 0.000000000000e+000;
+    In_F.Z("METHA-01") : 8.500000000000e-001;
+    Out_P.Z("METHA-01") : 8.500000000000e-001;
+    In_F.Z("ETHAN-01") : 1.500000000000e-001;
+    Out_P.Z("ETHAN-01") : 1.500000000000e-001;
+    In_F.Z("NITRO-01") : 0.000000000000e+000;
+    Out_P.Z("NITRO-01") : 0.000000000000e+000;
+    In_F.Z("OXYGE-01") : 0.000000000000e+000;
+    Out_P.Z("OXYGE-01") : 0.000000000000e+000;
+    In_F.Z("ARGON") : 0.000000000000e+000;
+    Out_P.Z("ARGON") : 0.000000000000e+000;
+    In_F.Z("CARBO-01") : 0.000000000000e+000;
+    Out_P.Z("CARBO-01") : 0.000000000000e+000;
+    In_F.Z("WATER") : 0.000000000000e+000;
+    Out_P.Z("WATER") : 0.000000000000e+000;
+    Zmn("METHA-01") : 7.514466468784e-001;
+    Zmn("ETHAN-01") : 2.485533531216e-001;
+    Zmn("NITRO-01") : 0.000000000000e+000;
+    Zmn("OXYGE-01") : 0.000000000000e+000;
+    Zmn("ARGON") : 0.000000000000e+000;
+    Zmn("CARBO-01") : 0.000000000000e+000;
+    Zmn("WATER") : 0.000000000000e+000;
+    Fcn("METHA-01") : 1.487500000000e+003;
+    Fcn("ETHAN-01") : 2.625000000000e+002;
+    Fcn("NITRO-01") : 0.000000000000e+000;
+    Fcn("OXYGE-01") : 0.000000000000e+000;
+    Fcn("ARGON") : 0.000000000000e+000;
+    Fcn("CARBO-01") : 0.000000000000e+000;
+    Fcn("WATER") : 0.000000000000e+000;
+    Fmcn("METHA-01") : 2.386360550000e+004;
+    Fmcn("ETHAN-01") : 7.893280500000e+003;
+    Fmcn("NITRO-01") : 0.000000000000e+000;
+    Fmcn("OXYGE-01") : 0.000000000000e+000;
+    Fmcn("ARGON") : 0.000000000000e+000;
+    Fmcn("CARBO-01") : 0.000000000000e+000;
+    Fmcn("WATER") : 0.000000000000e+000;
+    FeedSpec : "TP";
+    In_F.T : 8.000000000000e+001;
+    Out_P.T : 8.000000000000e+001;
+    In_F.P : 3.000000000000e+001;
+    Out_P.P : 3.000000000000e+001;
+    In_F.h : -7.420307633604e-002;
+    Out_P.h : -7.420307633604e-002;
+    y("METHA-01") : 8.500000000000e-001;
+    y("ETHAN-01") : 1.500000000000e-001;
+    y("NITRO-01") : 0.000000000000e+000;
+    y("OXYGE-01") : 0.000000000000e+000;
+    y("ARGON") : 0.000000000000e+000;
+    y("CARBO-01") : 0.000000000000e+000;
+    y("WATER") : 0.000000000000e+000;
+    x("METHA-01") : 0.000000000000e+000;
+    x("ETHAN-01") : 0.000000000000e+000;
+    x("NITRO-01") : 0.000000000000e+000;
+    x("OXYGE-01") : 0.000000000000e+000;
+    x("ARGON") : 0.000000000000e+000;
+    x("CARBO-01") : 0.000000000000e+000;
+    x("WATER") : 0.000000000000e+000;
+    x("METHA-01") : 8.500000000000e-001;
+       x("ETHAN-01") : 1.500000000000e-001;
+       x("NITRO-01") : 0.000000000000e+000;
+       x("OXYGE-01") : 0.000000000000e+000;
+       x("ARGON") : 0.000000000000e+000;
+       x("CARBO-01") : 0.000000000000e+000;
+       x("WATER") : 0.000000000000e+000;
+
+    F :      1.750000000000e+003;
+    FM :      3.175688600000e+004;
+    FR :      1.750000000000e+003;
+    T :      8.000000000000e+001;
+    P :      3.000000000000e+001;
+    H :     -7.420307633604e-002;
+    RHO :      1.050941510000e+000;
+    MW :      1.814679200000e+001;
+    VF :      1.000000000000e+000;
+    VFR :      1.000000000000e+000;
+    LF :      0.000000000000e+000;
+    RHOV :      1.050941510000e+000;
+    RHOL :      1.050941510000e+000;
+    MWV :      1.814679200000e+001;
+    MWL :      1.814679200000e+001;
+  ENDWITHIN;
+
+  WITHIN STREAMS("FG").pflash2(1)
+         Z("METHA-01") : 8.500000000000e-001;
+      Z("ETHAN-01") : 1.500000000000e-001;
+      Z("NITRO-01") : 0.000000000000e+000;
+      Z("OXYGE-01") : 0.000000000000e+000;
+      Z("ARGON") : 0.000000000000e+000;
+      Z("CARBO-01") : 0.000000000000e+000;
+      Z("WATER") : 0.000000000000e+000;
+      y("METHA-01") : 8.500000000000e-001;
+      y("ETHAN-01") : 1.500000000000e-001;
+      y("NITRO-01") : 0.000000000000e+000;
+      y("OXYGE-01") : 0.000000000000e+000;
+      y("ARGON") : 0.000000000000e+000;
+      y("CARBO-01") : 0.000000000000e+000;
+      y("WATER") : 0.000000000000e+000;
+      x("METHA-01") : 8.500000000000e-001;
+      x("ETHAN-01") : 1.500000000000e-001;
+      x("NITRO-01") : 0.000000000000e+000;
+      x("OXYGE-01") : 0.000000000000e+000;
+      x("ARGON") : 0.000000000000e+000;
+      x("CARBO-01") : 0.000000000000e+000;
+      x("WATER") : 0.000000000000e+000;
+      k("METHA-01") : 1.000000000000e+000;
+      k("ETHAN-01") : 1.000000000000e+000;
+      k("NITRO-01") : 1.000000000000e+000;
+      k("OXYGE-01") : 1.000000000000e+000;
+      k("ARGON") : 1.000000000000e+000;
+      k("CARBO-01") : 1.000000000000e+000;
+      k("WATER") : 1.000000000000e+000;
+
+    T :      8.000000000000e+001;
+    P :      3.000000000000e+001;
+    H :     -7.420307633604e-002;
+    VF :      1.000000000000e+000;
+    VFR :      1.000000000000e+000;
+    LF :      0.000000000000e+000;
+    VFACTOR :      0.000000000000e+000;
+    LFACTOR :      1.000000000000e-001;
+    ZFACTOR :      1.000000000000e+000;
+    HV :     -7.420307633604e-002;
+    HL :     -7.420307633604e-002;
+    RHOV :      1.050941510000e+000;
+    RHOL :      1.050941510000e+000;
+    MWV :      1.814679200000e+001;
+    MWL :      1.814679200000e+001;
+  ENDWITHIN;
+
+  WITHIN STREAMS("FG")
+
+  ENDWITHIN;
+
+  WITHIN STREAMS("NG")
+    Componentlist : "Type1";
+
+
+    FlowBasis : "Mole";
+    CompBasis : "Mole-Frac"; 
+    ValidPhases : "Vapor-Only";
+    MWC("METHA-01") : 1.604276000000e+001;
+    MWC("ETHAN-01") : 3.006964000000e+001;
+    MWC("NITRO-01") : 2.801348000000e+001;
+    MWC("OXYGE-01") : 3.199880000000e+001;
+    MWC("ARGON") : 3.994800000000e+001;
+    MWC("CARBO-01") : 4.400980000000e+001;
+    MWC("WATER") : 1.801528000000e+001;
+    In_F.F : 3.000000000000e+003;
+    Out_P.F : 3.000000000000e+003;
+    TotFlowSpec : True;
+    ZR("METHA-01") : 9.500000000000e-001;
+    ZR("ETHAN-01") : 5.000000000000e-002;
+    ZR("NITRO-01") : 0.000000000000e+000;
+    ZR("OXYGE-01") : 0.000000000000e+000;
+    ZR("ARGON") : 0.000000000000e+000;
+    ZR("CARBO-01") : 0.000000000000e+000;
+    ZR("WATER") : 0.000000000000e+000;
+    Zn("METHA-01") : 9.500000000000e-001;
+    Zn("ETHAN-01") : 5.000000000000e-002;
+    Zn("NITRO-01") : 0.000000000000e+000;
+    Zn("OXYGE-01") : 0.000000000000e+000;
+    Zn("ARGON") : 0.000000000000e+000;
+    Zn("CARBO-01") : 0.000000000000e+000;
+    Zn("WATER") : 0.000000000000e+000;
+    In_F.Z("METHA-01") : 9.500000000000e-001;
+    Out_P.Z("METHA-01") : 9.500000000000e-001;
+    In_F.Z("ETHAN-01") : 5.000000000000e-002;
+    Out_P.Z("ETHAN-01") : 5.000000000000e-002;
+    In_F.Z("NITRO-01") : 0.000000000000e+000;
+    Out_P.Z("NITRO-01") : 0.000000000000e+000;
+    In_F.Z("OXYGE-01") : 0.000000000000e+000;
+    Out_P.Z("OXYGE-01") : 0.000000000000e+000;
+    In_F.Z("ARGON") : 0.000000000000e+000;
+    Out_P.Z("ARGON") : 0.000000000000e+000;
+    In_F.Z("CARBO-01") : 0.000000000000e+000;
+    Out_P.Z("CARBO-01") : 0.000000000000e+000;
+    In_F.Z("WATER") : 0.000000000000e+000;
+    Out_P.Z("WATER") : 0.000000000000e+000;
+    Zmn("METHA-01") : 9.102082739094e-001;
+    Zmn("ETHAN-01") : 8.979172609057e-002;
+    Zmn("NITRO-01") : 0.000000000000e+000;
+    Zmn("OXYGE-01") : 0.000000000000e+000;
+    Zmn("ARGON") : 0.000000000000e+000;
+    Zmn("CARBO-01") : 0.000000000000e+000;
+    Zmn("WATER") : 0.000000000000e+000;
+    Fcn("METHA-01") : 2.850000000000e+003;
+    Fcn("ETHAN-01") : 1.500000000000e+002;
+    Fcn("NITRO-01") : 0.000000000000e+000;
+    Fcn("OXYGE-01") : 0.000000000000e+000;
+    Fcn("ARGON") : 0.000000000000e+000;
+    Fcn("CARBO-01") : 0.000000000000e+000;
+    Fcn("WATER") : 0.000000000000e+000;
+    Fmcn("METHA-01") : 4.572186600000e+004;
+    Fmcn("ETHAN-01") : 4.510446000000e+003;
+    Fmcn("NITRO-01") : 0.000000000000e+000;
+    Fmcn("OXYGE-01") : 0.000000000000e+000;
+    Fmcn("ARGON") : 0.000000000000e+000;
+    Fmcn("CARBO-01") : 0.000000000000e+000;
+    Fmcn("WATER") : 0.000000000000e+000;
+    FeedSpec : "TP";
+    In_F.T : 2.500000000000e+001;
+    Out_P.T : 2.500000000000e+001;
+    In_F.P : 3.000000000000e+001;
+    Out_P.P : 3.000000000000e+001;
+    In_F.h : -7.554903791436e-002;
+    Out_P.h : -7.554903791436e-002;
+
+    F :      3.000000000000e+003;
+    FM :      5.023231200000e+004;
+    FR :      3.000000000000e+003;
+    T :      2.500000000000e+001;
+    P :      3.000000000000e+001;
+    H :     -7.554903791436e-002;
+    RHO :      1.272914080000e+000;
+    MW :      1.674410400000e+001;
+  ENDWITHIN;
+
+  WITHIN STREAMS("NG").pvap(1)
+    y("METHA-01") : 9.500000000000e-001;
+    y("ETHAN-01") : 5.000000000000e-002;
+    y("NITRO-01") : 0.000000000000e+000;
+    y("OXYGE-01") : 0.000000000000e+000;
+    y("ARGON") : 0.000000000000e+000;
+    y("CARBO-01") : 0.000000000000e+000;
+    y("WATER") : 0.000000000000e+000;
+
+    T :      2.500000000000e+001;
+    P :      3.000000000000e+001;
+    H :     -7.554903791436e-002;
+    RHO :      1.272914080000e+000;
+    MW :      1.674410400000e+001;
+  ENDWITHIN;
+
+  WITHIN STREAMS("NG")
+
+  ENDWITHIN;
+
+//
+//*********** End of Blocks Operation at top level****************************************
+//
+
+//
+//*********** Global Reactions/Chemistry Structure declaration**********************************************
+//
+//
+//*********** End of Global Reactions/Chemistry Structure****************************************
+//
+
+//
+//*********** Global Reactions/Chemistry Structure declaration**********************************************
+//
+//
+//*********** End of Global Reactions/Chemistry Structure****************************************
+//
+
+//
+//*********** ACM Global Structures**********************************************
+//
+//
+//*********** End of ACM Global Structures****************************************
+//
+
+END;  // END of FLOWSHEET Section
